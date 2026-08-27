@@ -18,6 +18,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/frappe/frappe-bench/apps/azeon-systems
+            cd /home/frappe/frappe-bench/apps/azeon_core
             git pull origin main
             # Run any necessary build or migration commands for your server stack here
