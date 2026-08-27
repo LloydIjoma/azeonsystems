@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2026-08-27 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-08-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Azeon Core",
+ "name": "finance-dashboard",
+ "owner": "Administrator",
+ "page_name": "finance-dashboard",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "Azeon Tenant Admin"},
+  {"role": "Azeon Manager"},
+  {"role": "Accounts Manager"},
+  {"role": "Accounts User"}
+ ],
+ "standard": "Yes",
+ "title": "Finance Dashboard"
+}

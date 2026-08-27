@@ -1,0 +1,122 @@
+/*
+ * Azeon Systems desk theme
+ * Navy Blue headers/sidebars, Orange primary actions, Montserrat/Open Sans
+ * typography — brand tokens per CLAUDE.md.
+ *
+ * Loaded on every desk page via azeon_core/hooks.py -> app_include_css.
+ * Google Fonts is an external request; if the deployment target blocks
+ * outbound font CDN calls (e.g. an air-gapped VPS or strict tenant CSP),
+ * self-host these two families under public/fonts/ instead and swap the
+ * @import below for local @font-face rules.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap");
+
+:root {
+  --azeon-navy: #0D47A1;
+  --azeon-navy-dark: #093275;
+  --azeon-orange: #F57C00;
+  --azeon-orange-dark: #C96500;
+  --azeon-white: #FFFFFF;
+  --azeon-gray: #9E9E9E;
+  --azeon-font-heading: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  --azeon-font-body: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* -------------------------------------------------------------------- */
+/* Typography                                                            */
+/* -------------------------------------------------------------------- */
+body,
+.page-content,
+.form-control,
+.btn,
+.navbar {
+  font-family: var(--azeon-font-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.page-title,
+.title-text,
+.workspace-title,
+.card-head-title {
+  font-family: var(--azeon-font-heading);
+  font-weight: 700;
+}
+
+/* -------------------------------------------------------------------- */
+/* Navy Blue — top navbar                                                */
+/* -------------------------------------------------------------------- */
+.navbar,
+.navbar.navbar-expand {
+  background-color: var(--azeon-navy) !important;
+  border-bottom: 1px solid var(--azeon-navy-dark);
+}
+
+.navbar .navbar-brand,
+.navbar a,
+.navbar .app-logo,
+.navbar .octicon,
+.navbar .navbar-nav .nav-link {
+  color: var(--azeon-white) !important;
+}
+
+/* -------------------------------------------------------------------- */
+/* Navy Blue — desk / workspace sidebar (selectors cover both the        */
+/* pre-v14 desk sidebar and the v14+ workspace sidebar class names)      */
+/* -------------------------------------------------------------------- */
+.desk-sidebar,
+.body-sidebar,
+.standard-sidebar,
+.workspace-sidebar,
+.sidebar-container {
+  background-color: var(--azeon-navy) !important;
+  color: var(--azeon-white);
+}
+
+.desk-sidebar .sidebar-item-label,
+.desk-sidebar a,
+.workspace-sidebar .sidebar-item-label,
+.workspace-sidebar a,
+.standard-sidebar a {
+  color: var(--azeon-white) !important;
+}
+
+.desk-sidebar .selected,
+.workspace-sidebar .selected,
+.desk-sidebar .sidebar-item-container.selected > .standard-sidebar-item {
+  background-color: var(--azeon-navy-dark) !important;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------------- */
+/* Orange — primary actions                                              */
+/* -------------------------------------------------------------------- */
+.btn-primary,
+.primary-action,
+.btn-primary-light,
+a.btn.btn-primary {
+  background-color: var(--azeon-orange) !important;
+  border-color: var(--azeon-orange) !important;
+  color: var(--azeon-white) !important;
+}
+
+.btn-primary:hover,
+.primary-action:hover,
+a.btn.btn-primary:hover {
+  background-color: var(--azeon-orange-dark) !important;
+  border-color: var(--azeon-orange-dark) !important;
+}
+
+.indicator-pill.orange,
+.indicator.orange {
+  background-color: var(--azeon-orange);
+}
+
+/* -------------------------------------------------------------------- */
+/* Number Card / Dashboard Chart accents on the CEO Dashboard workspace  */
+/* -------------------------------------------------------------------- */
+.widget.number-card-widget-box .widget-title,
+.number-card-widget-box .number-card-value {
+  font-family: var(--azeon-font-heading);
+  color: var(--azeon-navy);
+}

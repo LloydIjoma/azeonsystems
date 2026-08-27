@@ -1,0 +1,5 @@
+include MANIFEST.in
+include *.txt
+include *.md
+recursive-include azeon_core *.css *.csv *.html *.ico *.js *.json *.md *.png *.py *.svg *.txt
+recursive-exclude azeon_core *.pyc

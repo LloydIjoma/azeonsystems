@@ -1,0 +1,54 @@
+{% extends "templates/web.html" %}
+
+{% block title %} Client Portal - Azeon Systems {% endblock %}
+
+{% block page_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Welcome to Your Portal</h2>
+            <p class="text-muted">Manage your services, billing, and active orders below.</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <h6 class="text-uppercase text-muted fw-bold fs-7">Active Orders</h6>
+                <h3 class="mb-0 text-primary" id="azeon-active-orders">--</h3>
+                <a href="/me" class="mt-2 text-decoration-none fs-7 fw-semibold">View Orders &rarr;</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <h6 class="text-uppercase text-muted fw-bold fs-7">Unpaid Invoices</h6>
+                <h3 class="mb-0 text-success" id="azeon-unpaid-invoices">--</h3>
+                <a href="/me" class="mt-2 text-decoration-none fs-7 fw-semibold">View Billing &rarr;</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <h6 class="text-uppercase text-muted fw-bold fs-7">Need Help?</h6>
+                <h3 class="mb-0 text-warning">24/7</h3>
+                <a href="mailto:support@azeonsystems.com.ng" class="mt-2 text-decoration-none fs-7 fw-semibold">Contact Support &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Populate the two live metrics above from the same account-scoped API the
+// desk billing page uses — see azeon_core/azeon_core/api/v1.py. There's no
+// real "support tickets" concept in this app yet, so that card links to
+// support instead of showing a fabricated count.
+frappe.call({
+    method: "azeon_core.api.v1.get_user_dashboard_data",
+    callback: function (r) {
+        if (r.message && r.message.metrics) {
+            document.getElementById("azeon-active-orders").textContent = r.message.metrics.active_orders;
+            document.getElementById("azeon-unpaid-invoices").textContent = r.message.metrics.unpaid_invoices;
+        }
+    },
+});
+</script>
+{% endblock %}

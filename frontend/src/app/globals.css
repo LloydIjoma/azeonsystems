@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --azeon-navy: #0d47a1;
+  --azeon-orange: #f57c00;
+}
+
+html {
+  scroll-behavior: smooth;
+}

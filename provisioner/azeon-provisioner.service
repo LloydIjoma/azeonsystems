@@ -1,0 +1,29 @@
+[Unit]
+Description=Azeon Systems Tenant Provisioner (Flask webhook service)
+After=network.target mariadb.service redis-server.service nginx.service
+
+[Service]
+Type=simple
+User=provisioner
+Group=provisioner
+WorkingDirectory=/opt/azeon-systems/provisioner
+EnvironmentFile=/opt/azeon-systems/provisioner/.env
+ExecStart=/opt/azeon-systems/provisioner/venv/bin/gunicorn \
+    --workers 2 \
+    --threads 4 \
+    --bind 127.0.0.1:8001 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    app:app
+Restart=on-failure
+RestartSec=5
+
+# This service must be able to `sudo -u frappe bench ...` and
+# `sudo systemctl reload nginx` — see provisioner/README.md for the
+# required narrowly-scoped sudoers rule. Do NOT set NoNewPrivileges=true,
+# it would break sudo escalation.
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target

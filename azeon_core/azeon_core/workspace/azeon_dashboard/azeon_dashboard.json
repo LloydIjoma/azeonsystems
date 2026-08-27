@@ -1,0 +1,95 @@
+{
+ "category": "Modules",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Azeon Executive Summary\",\"level\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Customer\"}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Sales Order\"}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\"}},{\"type\":\"spacer\",\"data\":{\"space\":20}},{\"type\":\"header\",\"data\":{\"text\":\"Core Workflows\",\"level\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales & Operations\"}}]",
+ "creation": "2026-08-26 12:00:00",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "dashboard",
+ "idx": 1,
+ "is_hidden": 0,
+ "is_standard": 1,
+ "label": "Azeon Dashboard",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales & Operations",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customers",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Orders",
+   "link_count": 0,
+   "link_to": "Sales Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Invoices",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-26 12:00:00",
+ "modified_by": "Administrator",
+ "module": "Azeon Core",
+ "name": "Azeon Dashboard",
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "format": "",
+   "label": "New Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "format": "",
+   "label": "New Sales Order",
+   "link_to": "Sales Order",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "format": "",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  }
+ ],
+ "title": "Azeon Dashboard"
+}

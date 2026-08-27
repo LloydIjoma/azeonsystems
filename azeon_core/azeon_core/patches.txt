@@ -1,0 +1,2 @@
+# Frappe patch module paths, one per line, run in order by `bench migrate`.
+# Empty for now — Phase 3 ships no schema patches, only after_install setup.

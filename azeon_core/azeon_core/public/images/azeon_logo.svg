@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="100%" height="100%">
+  <!-- Orange A / Network Nodes -->
+  <g id="logo-icon">
+    <path d="M 120 120 L 160 30 L 200 120 L 175 120 L 160 85 L 145 120 Z" fill="#F26522"/>
+    <path d="M 100 120 L 150 20 L 165 20 L 115 120 Z" fill="#F58220"/>
+    <line x1="115" y1="110" x2="145" y2="70" stroke="#FFFFFF" stroke-width="4"/>
+    <line x1="145" y1="70" x2="175" y2="40" stroke="#FFFFFF" stroke-width="4"/>
+    <line x1="115" y1="110" x2="175" y2="40" stroke="#FFFFFF" stroke-width="3"/>
+    <circle cx="115" cy="110" r="7" fill="#FFFFFF" stroke="#F58220" stroke-width="3"/>
+    <circle cx="145" cy="70" r="7" fill="#FFFFFF" stroke="#F58220" stroke-width="3"/>
+    <circle cx="175" cy="40" r="7" fill="#FFFFFF" stroke="#F58220" stroke-width="3"/>
+    <!-- Blue Check Arrow -->
+    <path d="M 140 95 L 165 115 L 225 35 L 245 40 L 170 135 L 130 100 Z" fill="#0D5C9D"/>
+    <path d="M 225 35 L 250 35 L 245 60 Z" fill="#0D5C9D"/>
+    <!-- Down Arrow -->
+    <path d="M 200 95 L 220 125 L 210 125 L 210 105 Z" fill="#0D5C9D"/>
+  </g>
+  <!-- Brand Text -->
+  <text x="70" y="165" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="bold" font-size="42" fill="#0D5C9D">Azeon <tspan font-weight="normal" fill="#0D5C9D">Systems</tspan></text>
+  <text x="75" y="190" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-style="italic" font-size="16" fill="#333333">Your Business, Seamlessly Connected</text>
+</svg>

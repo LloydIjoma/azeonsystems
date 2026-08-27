@@ -1,0 +1,114 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="azeon-pricing-hero" style="padding: 60px 20px; text-align: center; color: #ffffff; background-color: #0f172a;">
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; color: #ffffff;">Choose the Right Plan for Your Enterprise</h1>
+    <p style="font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 0 auto 40px auto;">
+        Flexible subscription tiers designed to scale seamlessly with your operations. Every plan starts with a 7-day trial.
+    </p>
+
+    <div id="azeon-checkout-status" style="max-width: 500px; margin: 0 auto 20px auto; display: none; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem;"></div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto;">
+
+        <!-- Starter Tier -->
+        <div style="flex: 1; min-width: 250px; max-width: 270px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 25px; text-align: left;">
+            <h3 style="color: #60a5fa; font-size: 1.3rem; margin-top: 0;">Starter</h3>
+            <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #ffffff;">$0 <span style="font-size: 0.9rem; color: #94a3b8;">/ month</span></div>
+            <p style="color: #94a3b8; font-size: 0.85rem;">Up to 3 users, basic CRM &amp; HR, 100 invoices/mo.</p>
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <ul style="list-style: none; padding: 0; color: #cbd5e1; line-height: 1.8; font-size: 0.85rem;">
+                <li>✓ Up to 3 User Accounts</li>
+                <li>✓ Basic CRM &amp; HR</li>
+                <li>✓ 100 Invoices / month</li>
+                <li>✓ Community Support</li>
+            </ul>
+            <a href="/login#signup" style="display: block; text-align: center; margin-top: 20px; background: #334155; color: #fff; padding: 10px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem;">Get Started</a>
+        </div>
+
+        <!-- Professional Tier -->
+        <div style="flex: 1; min-width: 250px; max-width: 270px; background-color: #1e293b; border: 2px solid #2563eb; border-radius: 12px; padding: 25px; text-align: left; position: relative;">
+            <span style="position: absolute; top: -12px; right: 15px; background-color: #2563eb; color: #fff; font-size: 0.7rem; font-weight: bold; padding: 3px 10px; border-radius: 10px; text-transform: uppercase;">Most Popular</span>
+            <h3 style="color: #60a5fa; font-size: 1.3rem; margin-top: 0;">Professional</h3>
+            <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #ffffff;">$15 <span style="font-size: 0.9rem; color: #94a3b8;">/ user / month</span></div>
+            <p style="color: #94a3b8; font-size: 0.85rem;">Up to 15 users, HR, CRM &amp; billing, unlimited invoices.</p>
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <ul style="list-style: none; padding: 0; color: #cbd5e1; line-height: 1.8; font-size: 0.85rem;">
+                <li>✓ Up to 15 User Accounts</li>
+                <li>✓ HR, CRM &amp; Billing</li>
+                <li>✓ Unlimited Invoices</li>
+                <li>✓ Priority Support</li>
+            </ul>
+            <button type="button" class="azeon-upgrade-btn" data-plan="professional" style="display: block; width: 100%; text-align: center; margin-top: 20px; background: #2563eb; color: #fff; padding: 10px 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer;">Upgrade Now</button>
+        </div>
+
+        <!-- Enterprise Tier -->
+        <div style="flex: 1; min-width: 250px; max-width: 270px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 25px; text-align: left;">
+            <h3 style="color: #60a5fa; font-size: 1.3rem; margin-top: 0;">Enterprise</h3>
+            <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #ffffff;">$59 <span style="font-size: 0.9rem; color: #94a3b8;">/ user / month</span></div>
+            <p style="color: #94a3b8; font-size: 0.85rem;">Up to 50 users, all 5 modules, advanced workflows &amp; API.</p>
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <ul style="list-style: none; padding: 0; color: #cbd5e1; line-height: 1.8; font-size: 0.85rem;">
+                <li>✓ Up to 50 User Accounts</li>
+                <li>✓ All 5 Core Modules</li>
+                <li>✓ Advanced Workflows &amp; API</li>
+                <li>✓ Priority Support</li>
+            </ul>
+            <button type="button" class="azeon-upgrade-btn" data-plan="enterprise" style="display: block; width: 100%; text-align: center; margin-top: 20px; background: #334155; color: #fff; padding: 10px 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer;">Upgrade Now</button>
+        </div>
+
+        <!-- Custom Tier -->
+        <div style="flex: 1; min-width: 250px; max-width: 270px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 25px; text-align: left;">
+            <h3 style="color: #60a5fa; font-size: 1.3rem; margin-top: 0;">Custom</h3>
+            <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #ffffff;">Custom</div>
+            <p style="color: #94a3b8; font-size: 0.85rem;">Unlimited users, custom integrations/SSO, dedicated manager, 99.99% SLA.</p>
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <ul style="list-style: none; padding: 0; color: #cbd5e1; line-height: 1.8; font-size: 0.85rem;">
+                <li>✓ Unlimited Users &amp; Data</li>
+                <li>✓ Custom Integrations &amp; SSO</li>
+                <li>✓ Dedicated Account Manager</li>
+                <li>✓ 99.99% Uptime SLA</li>
+            </ul>
+            <a href="mailto:sales@azeonsystems.com.ng" style="display: block; text-align: center; margin-top: 20px; background: #334155; color: #fff; padding: 10px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem;">Contact Sales</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Paid-tier checkout — see azeon_core/azeon_core/payments/paystack.py.
+// Only reachable for a logged-in tenant user; frappe.call carries the
+// session cookie automatically on this same-origin request.
+document.querySelectorAll(".azeon-upgrade-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+        var plan = btn.getAttribute("data-plan");
+        var statusEl = document.getElementById("azeon-checkout-status");
+        btn.disabled = true;
+        btn.textContent = "Starting checkout…";
+
+        fetch("/api/method/azeon_core.payments.paystack.initialize_transaction", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Frappe-CSRF-Token": frappe.csrf_token },
+            body: JSON.stringify({ plan: plan }),
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var authUrl = data.message && data.message.authorization_url;
+                if (authUrl) {
+                    window.location.href = authUrl;
+                    return;
+                }
+                throw new Error((data._server_messages && data._server_messages) || "Could not start checkout.");
+            })
+            .catch(function () {
+                statusEl.style.display = "block";
+                statusEl.style.background = "#7f1d1d";
+                statusEl.style.color = "#fecaca";
+                statusEl.textContent = "Please log in before upgrading your plan.";
+                btn.disabled = false;
+                btn.textContent = "Upgrade Now";
+            });
+    });
+});
+</script>
+{% endblock %}

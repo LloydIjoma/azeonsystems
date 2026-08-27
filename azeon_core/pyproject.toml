@@ -1,0 +1,21 @@
+[project]
+name = "azeon_core"
+authors = [
+    { name = "Azeon Systems", email = "greenlunarng@gmail.com" }
+]
+description = "Azeon Systems branding, CEO dashboard, and workspace defaults provisioned onto every tenant site."
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+# `requests` is always present in a Frappe bench env (frappe itself depends
+# on it) but is declared explicitly since payments/paystack.py imports it
+# directly. `boto3` is NOT part of a stock bench env and must actually be
+# installed (`./env/bin/pip install boto3`) for backup_manager.py's S3
+# upload path to work — it was previously undeclared anywhere.
+dependencies = ["requests", "boto3"]
+
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.dev-dependencies]

@@ -1,0 +1,19 @@
+/* Azeon Custom Desk Styling */
+:root {
+    --primary-color: #2563eb;
+    --navbar-bg: #1e293b;
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Hide standard Frappe help and promo footers */
+.footer-powered, .help-dropdown {
+    display: none !important;
+}

@@ -1,0 +1,38 @@
+<div class="azeon-print-container" style="font-family: Arial, sans-serif; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+        <div>
+            <h2 style="color: #2563eb; margin: 0;">INVOICE</h2>
+            <p style="margin: 5px 0; color: #64748b;"><strong>Invoice #:</strong> {{ doc.name }}</p>
+            <p style="margin: 0; color: #64748b;"><strong>Date:</strong> {{ doc.posting_date }}</p>
+        </div>
+        <div style="text-align: right;">
+            <h3 style="margin: 0;">{{ doc.company }}</h3>
+            <p style="margin: 5px 0; color: #64748b;">Customer: {{ doc.customer_name }}</p>
+        </div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 25px;">
+        <thead>
+            <tr style="background-color: #f1f5f9; text-align: left;">
+                <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">Item</th>
+                <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">Qty</th>
+                <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">Rate</th>
+                <th style="padding: 10px; border-bottom: 1px solid #cbd5e1; text-align: right;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in doc.items %}
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">{{ item.item_name }}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">{{ item.qty }}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">{{ doc.get_formatted("rate", item) }}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">{{ doc.get_formatted("amount", item) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; text-align: right;">
+        <h3 style="color: #0f172a;">Total: {{ doc.get_formatted("grand_total") }}</h3>
+    </div>
+</div>
