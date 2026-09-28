@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Platform Admin Login — Azeon Systems</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--azeon-blue-900: #0a1e42;
+			--azeon-blue-700: #0f2a63;
+			--azeon-blue-500: #1b3f8f;
+			--azeon-orange: #f7931e;
+			--azeon-orange-dark: #e07d0a;
+			--azeon-text: #ffffff;
+			--azeon-text-muted: #a9b6d6;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+
+		body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background: radial-gradient(circle at 50% -10%, var(--azeon-blue-500) 0%, var(--azeon-blue-700) 45%, var(--azeon-blue-900) 100%);
+			color: var(--azeon-text);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 24px;
+		}
+
+		.admin-login-wrap {
+			width: 100%;
+			max-width: 400px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.admin-login-logo {
+			font-size: 1.6rem;
+			font-weight: 800;
+			margin-bottom: 6px;
+			letter-spacing: -0.02em;
+		}
+
+		.admin-login-logo .accent {
+			color: var(--azeon-orange);
+		}
+
+		.admin-login-subtitle {
+			color: var(--azeon-text-muted);
+			font-size: 0.85rem;
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			margin-bottom: 32px;
+			text-align: center;
+		}
+
+		.admin-login-card {
+			width: 100%;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.09);
+			border-radius: 16px;
+			padding: 36px 32px;
+			backdrop-filter: blur(12px);
+			box-shadow: 0 24px 60px rgba(3, 10, 30, 0.55);
+		}
+
+		.admin-login-card h1 {
+			font-size: 1.3rem;
+			font-weight: 700;
+			margin: 0 0 4px 0;
+			text-align: center;
+		}
+
+		.admin-login-card p.hint {
+			color: var(--azeon-text-muted);
+			font-size: 0.85rem;
+			text-align: center;
+			margin: 0 0 28px 0;
+		}
+
+		.field {
+			margin-bottom: 18px;
+		}
+
+		.field label {
+			display: block;
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--azeon-text-muted);
+			margin-bottom: 6px;
+		}
+
+		.field input {
+			width: 100%;
+			padding: 12px 14px;
+			border-radius: 8px;
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			background: rgba(3, 10, 30, 0.35);
+			color: var(--azeon-text);
+			font-size: 0.95rem;
+			font-family: inherit;
+			transition: border-color 0.15s ease, box-shadow 0.15s ease;
+		}
+
+		.field input::placeholder {
+			color: rgba(169, 182, 214, 0.55);
+		}
+
+		.field input:focus {
+			outline: none;
+			border-color: var(--azeon-orange);
+			box-shadow: 0 0 0 3px rgba(247, 147, 30, 0.18);
+		}
+
+		.admin-login-error {
+			display: none;
+			background: rgba(220, 38, 38, 0.12);
+			border: 1px solid rgba(220, 38, 38, 0.35);
+			color: #fca5a5;
+			font-size: 0.85rem;
+			border-radius: 8px;
+			padding: 10px 12px;
+			margin-bottom: 18px;
+		}
+
+		.btn-signin {
+			width: 100%;
+			border: none;
+			border-radius: 8px;
+			padding: 13px 16px;
+			background: var(--azeon-orange);
+			color: #1a1204;
+			font-size: 0.95rem;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background 0.15s ease, transform 0.05s ease;
+		}
+
+		.btn-signin:hover:not(:disabled) {
+			background: var(--azeon-orange-dark);
+		}
+
+		.btn-signin:active:not(:disabled) {
+			transform: translateY(1px);
+		}
+
+		.btn-signin:disabled {
+			opacity: 0.65;
+			cursor: not-allowed;
+		}
+
+		.back-link {
+			display: block;
+			text-align: center;
+			margin-top: 24px;
+			color: var(--azeon-text-muted);
+			font-size: 0.85rem;
+			text-decoration: none;
+		}
+
+		.back-link:hover {
+			color: var(--azeon-text);
+		}
+	</style>
+</head>
+<body>
+	<div class="admin-login-wrap">
+		<div class="admin-login-logo">Azeon<span class="accent">Systems</span></div>
+		<div class="admin-login-subtitle">Platform Admin</div>
+
+		<div class="admin-login-card">
+			<h1>Sign in to Platform Admin</h1>
+			<p class="hint">Restricted to authorized platform administrators</p>
+
+			<div class="admin-login-error" id="login-error"></div>
+
+			<form id="admin-login-form" novalidate>
+				<div class="field">
+					<label for="email">Email</label>
+					<input type="email" id="email" name="email" placeholder="you@azeonsystems.com.ng" autocomplete="username" required>
+				</div>
+				<div class="field">
+					<label for="password">Password</label>
+					<input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+				</div>
+				<button type="submit" class="btn-signin" id="signin-btn">Sign In</button>
+			</form>
+		</div>
+
+		<a href="/" class="back-link">← Back to Website</a>
+	</div>
+
+	<script>
+		(function () {
+			var form = document.getElementById('admin-login-form');
+			var btn = document.getElementById('signin-btn');
+			var errorBox = document.getElementById('login-error');
+
+			function showError(message) {
+				errorBox.textContent = message;
+				errorBox.style.display = 'block';
+			}
+
+			function clearError() {
+				errorBox.style.display = 'none';
+				errorBox.textContent = '';
+			}
+
+			function setLoading(isLoading) {
+				btn.disabled = isLoading;
+				btn.textContent = isLoading ? 'Signing in…' : 'Sign In';
+			}
+
+			form.addEventListener('submit', function (e) {
+				e.preventDefault();
+				clearError();
+				setLoading(true);
+
+				var usr = document.getElementById('email').value.trim();
+				var pwd = document.getElementById('password').value;
+
+				fetch('/api/method/login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'X-Requested-With': 'XMLHttpRequest'
+					},
+					credentials: 'same-origin',
+					body: new URLSearchParams({ usr: usr, pwd: pwd }).toString()
+				})
+					.then(function (resp) {
+						if (!resp.ok) {
+							throw new Error('Invalid email or password.');
+						}
+						return resp.json().catch(function () { return {}; });
+					})
+					.then(function (data) {
+						if (!data || data.message !== 'Logged In') {
+							throw new Error('Invalid email or password.');
+						}
+						// Confirm the just-authenticated session is actually
+						// allowed into Platform Admin before redirecting.
+						return fetch('/api/method/azeon_core.platform_admin.verify_platform_admin_login', {
+							method: 'GET',
+							headers: { 'X-Requested-With': 'XMLHttpRequest' },
+							credentials: 'same-origin'
+						});
+					})
+					.then(function (verifyResp) {
+						if (!verifyResp.ok) {
+							return fetch('/api/method/logout', {
+								method: 'POST',
+								headers: { 'X-Requested-With': 'XMLHttpRequest' },
+								credentials: 'same-origin'
+							}).then(function () {
+								throw new Error('This account is not authorized for Platform Admin access.');
+							});
+						}
+						window.location.href = '/app/platform-admin';
+					})
+					.catch(function (err) {
+						setLoading(false);
+						showError(err.message || 'Login failed. Please try again.');
+					});
+			});
+		})();
+	</script>
+</body>
+</html>

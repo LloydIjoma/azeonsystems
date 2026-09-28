@@ -15,7 +15,7 @@ const PLANS: Plan[] = [
   {
     name: "Starter",
     planKey: "starter",
-    price: "$0",
+    price: "#0",
     priceSuffix: "/mo",
     seats: "Up to 3 users",
     features: ["Basic CRM & HR", "100 invoices/mo", "Community support"],
@@ -24,7 +24,7 @@ const PLANS: Plan[] = [
   {
     name: "Professional",
     planKey: "professional",
-    price: "$15",
+    price: "#50,000",
     priceSuffix: "/user/mo",
     seats: "Up to 15 users",
     features: ["HR, CRM & billing", "Unlimited invoices", "Priority email support"],
@@ -34,7 +34,7 @@ const PLANS: Plan[] = [
   {
     name: "Enterprise",
     planKey: "enterprise",
-    price: "$59",
+    price: "#90,000",
     priceSuffix: "/user/mo",
     seats: "Up to 50 users",
     features: ["All 5 core modules", "Advanced workflows", "API access"],

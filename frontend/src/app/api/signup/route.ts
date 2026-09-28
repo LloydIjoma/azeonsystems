@@ -1,26 +1,30 @@
-import { NextRequest, NextResponse } from "next/server";
-import crypto from "node:crypto";
+import { NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 
-// Node runtime (not Edge): we need node:crypto for HMAC and a fetch loop
-// that can stay open for minutes while bench provisions the tenant site.
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+// Bridges the marketing site's /register form to the Flask provisioner
+// (see ../../../../../provisioner/app.py). The provisioner speaks
+// "signed POST -> 202 + job_id -> poll for completion"; this route does
+// the signing and polling on the caller's behalf and only ever returns a
+// single final response, per the contract exercised by
+// scripts/e2e_test.py's run_via_frontend_flow():
+//   - 200 { tenantUrl } once the tenant site is fully provisioned
+//   - non-200 { message } on validation, upstream, or timeout failure
+//
+// NOTE (see DEPLOYMENT.md step 6): this only works because in production
+// Next.js runs as a persistent `next start` process (systemd), which can
+// hold a connection open for the several minutes provisioning takes. If
+// this route is ever deployed to a serverless platform with a short
+// function timeout, it needs to change to client-side polling instead.
+export const runtime = 'nodejs';
 
-const PROVISIONER_URL = process.env.PROVISIONER_URL ?? "http://127.0.0.1:8001";
-const WEBHOOK_SECRET = process.env.PROVISIONER_WEBHOOK_SECRET;
-const POLL_INTERVAL_MS = Number(process.env.SIGNUP_POLL_INTERVAL_MS ?? 3000);
-const POLL_TIMEOUT_MS = Number(process.env.SIGNUP_POLL_TIMEOUT_MS ?? 15 * 60 * 1000);
+// Keep in sync with provisioner/app.py's PLAN_VALUES.
+const PLAN_VALUES = new Set(['starter', 'professional', 'enterprise']);
 
-// Keep in sync with the PLANS list in app/register/page.tsx and with the
-// self-serve tiers on the pricing page (components/PricingTable.tsx).
-const PLAN_VALUES = ["starter", "professional", "enterprise"] as const;
-type Plan = (typeof PLAN_VALUES)[number];
-
-interface SignupBody {
-  companyName?: string;
-  adminEmail?: string;
-  adminPassword?: string;
-  plan?: string;
+interface SignupRequestBody {
+  companyName?: unknown;
+  email?: unknown;
+  password?: unknown;
+  plan?: unknown;
 }
 
 interface ProvisionAcceptedResponse {
@@ -35,151 +39,152 @@ interface ProvisionJobStatus {
   slug: string;
   site_name: string;
   status: string;
+  steps: Array<{ step: string; ok: boolean; detail: string }>;
   error: string | null;
-  admin_email?: string;
-  admin_password?: string;
 }
 
-function isValidPlan(value: unknown): value is Plan {
-  return typeof value === "string" && (PLAN_VALUES as readonly string[]).includes(value);
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function POST(req: NextRequest) {
-  if (!WEBHOOK_SECRET) {
-    console.error("PROVISIONER_WEBHOOK_SECRET is not set for the frontend server.");
-    return NextResponse.json({ error: "Server misconfiguration." }, { status: 500 });
-  }
+function signPayload(secret: string, rawBody: string): string {
+  const digest = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  return `sha256=${digest}`;
+}
 
-  let body: SignupBody;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
+export async function POST(request: Request) {
+  const provisionerUrl = process.env.PROVISIONER_URL;
+  const webhookSecret = process.env.PROVISIONER_WEBHOOK_SECRET;
+  // Defaults mirror frontend/.env.example.
+  const pollIntervalMs = Number(process.env.SIGNUP_POLL_INTERVAL_MS) || 3000;
+  const pollTimeoutMs = Number(process.env.SIGNUP_POLL_TIMEOUT_MS) || 900000;
 
-  const { companyName, adminEmail, adminPassword, plan } = body;
-
-  if (!companyName || !companyName.trim()) {
-    return NextResponse.json({ error: "companyName is required." }, { status: 400 });
-  }
-  if (!adminEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adminEmail)) {
-    return NextResponse.json({ error: "A valid adminEmail is required." }, { status: 400 });
-  }
-  if (!isValidPlan(plan)) {
+  if (!provisionerUrl || !webhookSecret) {
+    console.error(
+      'Signup API misconfigured: PROVISIONER_URL and/or PROVISIONER_WEBHOOK_SECRET are not set.'
+    );
     return NextResponse.json(
-      { error: `plan must be one of: ${PLAN_VALUES.join(", ")}.` },
-      { status: 400 }
+      { message: 'Signup is temporarily unavailable. Please try again later.' },
+      { status: 500 }
     );
   }
 
-  // `plan` rides along for future billing wiring — the provisioner doesn't
-  // act on it yet (see provisioner/app.py); it's not persisted anywhere.
-  const provisionPayload = {
-    company_name: companyName.trim(),
-    admin_email: adminEmail.trim(),
-    ...(adminPassword ? { admin_password: adminPassword } : {}),
-    plan,
-  };
-
-  const rawBody = JSON.stringify(provisionPayload);
-  const signature = `sha256=${crypto.createHmac("sha256", WEBHOOK_SECRET).update(rawBody).digest("hex")}`;
-
-  let provisionRes: Response;
+  let body: SignupRequestBody;
   try {
-    provisionRes = await fetch(`${PROVISIONER_URL}/webhooks/provision`, {
-      method: "POST",
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { companyName, email, password, plan } = body ?? {};
+
+  if (!companyName || typeof companyName !== 'string') {
+    return NextResponse.json({ message: 'companyName is required' }, { status: 400 });
+  }
+  if (!email || typeof email !== 'string') {
+    return NextResponse.json({ message: 'email is required' }, { status: 400 });
+  }
+  if (!password || typeof password !== 'string') {
+    return NextResponse.json({ message: 'password is required' }, { status: 400 });
+  }
+
+  let normalizedPlan = 'starter';
+  if (typeof plan === 'string' && plan.trim()) {
+    const lower = plan.trim().toLowerCase();
+    if (!PLAN_VALUES.has(lower)) {
+      return NextResponse.json(
+        { message: `plan must be one of: ${Array.from(PLAN_VALUES).join(', ')}` },
+        { status: 400 }
+      );
+    }
+    normalizedPlan = lower;
+  }
+
+  // Field names here match what provisioner/app.py's /webhooks/provision
+  // expects (snake_case, admin_* prefix), not the frontend form's own
+  // camelCase field names.
+  const rawBody = JSON.stringify({
+    company_name: companyName,
+    admin_email: email,
+    admin_password: password,
+    plan: normalizedPlan,
+  });
+  const signature = signPayload(webhookSecret, rawBody);
+
+  let accepted: ProvisionAcceptedResponse;
+  try {
+    const provisionRes = await fetch(`${provisionerUrl}/webhooks/provision`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "X-Azeon-Signature": signature,
+        'Content-Type': 'application/json',
+        'X-Azeon-Signature': signature,
       },
       body: rawBody,
     });
-  } catch (err) {
-    console.error("Failed to reach provisioner:", err);
+
+    const data = await provisionRes.json().catch(() => null);
+
+    if (provisionRes.status !== 202) {
+      const message = (data && (data.error || data.message)) || 'Failed to start provisioning';
+      return NextResponse.json({ message }, { status: provisionRes.status || 502 });
+    }
+
+    if (!data || !data.job_id || !data.status_url || !data.site_name) {
+      throw new Error('Provisioner accepted the request but returned an unexpected response');
+    }
+
+    accepted = data;
+  } catch (error: any) {
+    console.error('Signup API: failed to reach provisioner', error);
     return NextResponse.json(
-      { error: "Could not reach the provisioning service. Please try again shortly." },
+      { message: 'Could not reach the provisioning service. Please try again.' },
       { status: 502 }
     );
   }
 
-  if (provisionRes.status !== 202) {
-    const detail = await safeJson(provisionRes);
+  const statusUrl = new URL(accepted.status_url, provisionerUrl).toString();
+  const deadline = Date.now() + pollTimeoutMs;
+  let job: ProvisionJobStatus | null = null;
+
+  try {
+    while (Date.now() < deadline) {
+      await sleep(pollIntervalMs);
+
+      const statusRes = await fetch(statusUrl, { method: 'GET' });
+      if (!statusRes.ok) {
+        // Transient poll failure — keep trying until the deadline.
+        continue;
+      }
+
+      const parsed: ProvisionJobStatus = await statusRes.json();
+      if (parsed.status === 'completed' || parsed.status === 'failed') {
+        job = parsed;
+        break;
+      }
+    }
+  } catch (error: any) {
+    console.error('Signup API: error while polling provisioning status', error);
     return NextResponse.json(
-      { error: detail?.error ?? "Provisioning request was rejected." },
-      { status: provisionRes.status === 409 ? 409 : 502 }
+      {
+        message:
+          'Lost contact with the provisioning service while your tenant was being created.',
+      },
+      { status: 502 }
     );
   }
 
-  const accepted = (await provisionRes.json()) as ProvisionAcceptedResponse;
-  const { job_id, status_url } = accepted;
-
-  // Poll the provisioner's job status until it reports completed/failed, or
-  // we hit our own ceiling.
-  //
-  // CAVEAT: this keeps the HTTP request open for as long as provisioning
-  // takes (realistically a couple of minutes — bench new-site + installing
-  // erpnext + azeon_core). That's fine on a long-running Node server (this
-  // route is pinned to the Node runtime, not Edge, for exactly this reason)
-  // but WOULD be killed early on a serverless host with a short function
-  // timeout (e.g. Vercel's default). If this frontend ever moves to
-  // serverless, replace this loop with client-side polling of a thin
-  // /api/signup/status/[jobId] proxy instead of blocking here.
-  const deadline = Date.now() + POLL_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    await sleep(POLL_INTERVAL_MS);
-
-    let statusRes: Response;
-    try {
-      statusRes = await fetch(`${PROVISIONER_URL}${status_url}`, { cache: "no-store" });
-    } catch (err) {
-      console.error("Failed to poll provisioner job status:", err);
-      continue; // transient network hiccup — keep trying until the deadline
-    }
-
-    if (!statusRes.ok) continue;
-
-    const job = (await statusRes.json()) as ProvisionJobStatus;
-
-    if (job.status === "completed") {
-      return NextResponse.json({
-        jobId: job_id,
-        tenantUrl: `https://${job.site_name}`,
-        adminEmail: job.admin_email,
-        // admin_password is only present on the FIRST "completed" read from
-        // the provisioner — it redacts it from memory right after. Passed
-        // through once so the user can see their generated password.
-        adminPassword: job.admin_password,
-      });
-    }
-
-    if (job.status === "failed") {
-      return NextResponse.json(
-        { error: job.error ?? "Provisioning failed.", jobId: job_id },
-        { status: 500 }
-      );
-    }
-    // otherwise still in progress — keep polling
+  if (!job) {
+    return NextResponse.json(
+      {
+        message: `Provisioning is taking longer than expected. Please contact support with job id ${accepted.job_id}.`,
+      },
+      { status: 504 }
+    );
   }
 
-  return NextResponse.json(
-    {
-      error: "Provisioning is taking longer than expected. Please check back shortly.",
-      jobId: job_id,
-      statusUrl: status_url,
-    },
-    { status: 202 }
-  );
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function safeJson(res: Response): Promise<{ error?: string } | null> {
-  try {
-    return await res.json();
-  } catch {
-    return null;
+  if (job.status === 'failed') {
+    return NextResponse.json({ message: job.error || 'Provisioning failed' }, { status: 502 });
   }
+
+  return NextResponse.json({ tenantUrl: `https://${job.site_name}` }, { status: 200 });
 }

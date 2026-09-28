@@ -1,0 +1,2 @@
+# Frappe patch module paths, one per line, run in order by `bench migrate`.
+azeon_core.patches.add_user_onboarded_field

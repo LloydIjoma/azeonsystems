@@ -1,202 +1,163 @@
-"use client";
+'use client';
 
-import { Suspense, useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
-import { slugify } from "@/lib/slugify";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-// Keep in sync with PLAN_VALUES in app/api/signup/route.ts and with the
-// self-serve tiers on the pricing page (frontend/src/components/PricingTable.tsx).
-// "Custom" is intentionally excluded — it's sales-negotiated, not self-serve,
-// and its pricing-page CTA links to #demo instead of here.
-const PLANS = [
-  { value: "starter", label: "Starter" },
-  { value: "professional", label: "Professional" },
-  { value: "enterprise", label: "Enterprise" },
-] as const;
+type Status = 'form' | 'submitting' | 'error';
 
-type Plan = (typeof PLANS)[number]["value"];
-
-function isPlan(value: string | null): value is Plan {
-  return PLANS.some((p) => p.value === value);
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-azeon-navy to-azeon-navy-dark px-6 py-12">
+      <Link href="/" className="mb-8 font-heading text-2xl font-extrabold tracking-tight text-white">
+        Azeon<span className="text-azeon-orange">Systems</span>
+      </Link>
+      <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-8 shadow-2xl">
+        {children}
+      </div>
+    </div>
+  );
 }
 
-type SubmitState =
-  | { status: "idle" }
-  | { status: "submitting" }
-  | { status: "success"; tenantUrl: string; adminPassword?: string }
-  | { status: "error"; message: string };
+export default function RegisterPage() {
+  const router = useRouter();
+  const [companyName, setCompanyName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [plan, setPlan] = useState('Starter');
+  const [status, setStatus] = useState<Status>('form');
+  const [error, setError] = useState('');
 
-function RegisterForm() {
-  // Pre-selects whichever tier the visitor clicked on the pricing page
-  // (e.g. /register?plan=enterprise); falls back to the most popular tier.
-  const searchParams = useSearchParams();
-  const requestedPlan = searchParams.get("plan");
-
-  const [companyName, setCompanyName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [plan, setPlan] = useState<Plan>(isPlan(requestedPlan) ? requestedPlan : "professional");
-  const [state, setState] = useState<SubmitState>({ status: "idle" });
-
-  const slugPreview = useMemo(() => slugify(companyName), [companyName]);
-
-  async function handleSubmit(e: FormEvent) {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!slugPreview.isValid) {
-      setState({
-        status: "error",
-        message: "Please choose a company name that produces a valid subdomain.",
-      });
-      return;
-    }
-
-    setState({ status: "submitting" });
+    setError('');
+    setStatus('submitting');
 
     try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName,
-          adminEmail,
-          adminPassword: adminPassword || undefined,
-          plan,
-        }),
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyName, email, password, plan }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setState({ status: "error", message: data.error ?? "Something went wrong. Please try again." });
+        setError(data.message || 'Registration failed');
+        setStatus('error');
         return;
       }
 
-      setState({ status: "success", tenantUrl: data.tenantUrl, adminPassword: data.adminPassword });
+      // Redirect to the custom welcome page we control
+      const tenantUrl = data.tenantUrl || '';
+      router.push(`/welcome?url=${encodeURIComponent(tenantUrl)}`);
     } catch {
-      setState({ status: "error", message: "Could not reach the server. Please try again." });
+      setError('Something went wrong. Please try again.');
+      setStatus('error');
     }
-  }
+  };
 
-  if (state.status === "success") {
+  if (status === 'submitting') {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
-        <div className="w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-sm">
-          <h1 className="font-heading text-2xl font-bold text-azeon-navy">Your workspace is ready 🎉</h1>
-          <p className="mt-4 font-body text-gray-600">
-            Sign in at{" "}
-            <a href={state.tenantUrl} className="font-semibold text-azeon-orange underline">
-              {state.tenantUrl}
-            </a>
-          </p>
-          {state.adminPassword && (
-            <p className="mt-4 rounded-md bg-gray-50 p-3 font-body text-sm text-gray-700">
-              Admin password: <code className="font-mono">{state.adminPassword}</code>
-              <br />
-              Save this now — it won&apos;t be shown again.
+      <Shell>
+        <div className="space-y-6 text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-azeon-orange border-t-transparent" />
+          <div>
+            <h2 className="font-heading text-2xl font-extrabold text-gray-900">
+              Provisioning your workspace...
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              This can take a few minutes while we set up your dedicated environment.
+              Please don&apos;t close or refresh this tab.
             </p>
-          )}
+          </div>
         </div>
-      </main>
+      </Shell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6 py-16">
-      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-2xl bg-white p-10 shadow-sm">
-        <h1 className="font-heading text-2xl font-bold text-azeon-navy">Start your free trial</h1>
-        <p className="mt-2 font-body text-sm text-gray-500">No credit card required.</p>
+    <Shell>
+      <div className="text-center">
+        <h2 className="font-heading text-2xl font-extrabold text-gray-900">Start your free trial</h2>
+        <p className="mt-2 text-sm text-gray-600">No credit card required.</p>
+      </div>
 
-        <div className="mt-8 space-y-5">
-          <div>
-            <label className="block font-body text-sm font-semibold text-gray-700">Company name</label>
-            <input
-              required
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-body text-sm focus:border-azeon-navy focus:outline-none focus:ring-1 focus:ring-azeon-navy"
-              placeholder="Acme Corp"
-            />
-            <p className="mt-2 font-body text-xs text-gray-500">
-              Your workspace:{" "}
-              <span className={slugPreview.isValid ? "font-semibold text-azeon-navy" : "font-semibold text-red-500"}>
-                https://{slugPreview.slug || "yourcompany"}.azeonsystems.com.ng
-              </span>
-              {!slugPreview.isValid && slugPreview.slug && (
-                <span className="ml-1 text-red-500">
-                  ({slugPreview.reason === "reserved" ? "that name is reserved" : "invalid characters"})
-                </span>
-              )}
-            </p>
-          </div>
+      {status === 'error' && error && (
+        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      )}
 
-          <div>
-            <label className="block font-body text-sm font-semibold text-gray-700">Admin email</label>
-            <input
-              required
-              type="email"
-              value={adminEmail}
-              onChange={(e) => setAdminEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-body text-sm focus:border-azeon-navy focus:outline-none focus:ring-1 focus:ring-azeon-navy"
-              placeholder="you@company.com"
-            />
-          </div>
-
-          <div>
-            <label className="block font-body text-sm font-semibold text-gray-700">Admin password</label>
-            <input
-              type="password"
-              minLength={8}
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-body text-sm focus:border-azeon-navy focus:outline-none focus:ring-1 focus:ring-azeon-navy"
-              placeholder="Leave blank to auto-generate"
-            />
-          </div>
-
-          <div>
-            <label className="block font-body text-sm font-semibold text-gray-700">Plan</label>
-            <select
-              value={plan}
-              onChange={(e) => setPlan(e.target.value as Plan)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-body text-sm focus:border-azeon-navy focus:outline-none focus:ring-1 focus:ring-azeon-navy"
-            >
-              {PLANS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {state.status === "error" && (
-            <p className="rounded-md bg-red-50 px-3 py-2 font-body text-sm text-red-600">{state.message}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={state.status === "submitting" || !slugPreview.isValid}
-            className="w-full rounded-md bg-azeon-orange px-4 py-3 font-body text-sm font-semibold text-white transition hover:bg-azeon-orange-dark disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {state.status === "submitting" ? "Setting up your workspace…" : "Start Free Trial"}
-          </button>
-          {state.status === "submitting" && (
-            <p className="text-center font-body text-xs text-gray-500">
-              This can take a couple of minutes — we&apos;re creating your dedicated workspace.
-            </p>
-          )}
+      <form className="space-y-6" onSubmit={handleRegister} autoComplete="on">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Company name</label>
+          <input
+            type="text"
+            name="company"
+            required
+            autoComplete="organization"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-azeon-orange focus:outline-none"
+            placeholder="Your company name"
+          />
         </div>
-      </form>
-    </main>
-  );
-}
 
-export default function RegisterPage() {
-  // useSearchParams() requires a Suspense boundary so the page can still be
-  // statically prerendered up to that point.
-  return (
-    <Suspense fallback={null}>
-      <RegisterForm />
-    </Suspense>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Admin email</label>
+          <input
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-azeon-orange focus:outline-none"
+            placeholder="you@company.com"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Admin password</label>
+          <input
+            type="password"
+            name="password"
+            required
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-azeon-orange focus:outline-none"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Plan</label>
+          <select
+            name="plan"
+            value={plan}
+            onChange={(e) => setPlan(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-azeon-orange focus:outline-none bg-white"
+          >
+            <option value="Starter">Starter</option>
+            <option value="Professional">Professional</option>
+            <option value="Enterprise">Enterprise</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full rounded-md bg-azeon-orange py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-azeon-orange-dark transition"
+        >
+          Start Free Trial
+        </button>
+      </form>
+
+      <div className="text-center text-sm text-gray-600 pt-4 border-t border-gray-100">
+        Already have an account?{' '}
+        <Link href="/login" className="font-semibold text-azeon-orange hover:underline">
+          Sign in
+        </Link>
+      </div>
+    </Shell>
   );
 }

@@ -183,14 +183,19 @@ def provision_tenant(job_id, slug, company_name, admin_email, admin_password, pl
     try:
         _set_job(job_id, status="creating_site")
 
+        # NOTE: `bench new-site` has no `--admin-email` flag on this bench
+        # version (confirmed via `bench new-site --help` — only
+        # --admin-password is accepted; passing --admin-email crashes with
+        # "Error: No such option: --admin-email"). The Administrator
+        # account's email is instead corrected to admin_email in the
+        # bootstrap_tenant step below (via `bench execute`, which already
+        # receives admin_email) — otherwise every tenant's actual login
+        # would stay the default "admin@example.com" regardless of what
+        # the customer entered at signup, and they'd never be able to log
+        # in with the email they were told was their admin_email.
         new_site_cmd = [
             BENCH_BIN, "new-site", site_name,
             "--admin-password", admin_password,
-            # Without this, every tenant's actual login is the default
-            # "admin@example.com" regardless of what the customer entered
-            # at signup — they'd never be able to log in with the email
-            # they were told was their admin_email.
-            "--admin-email", admin_email,
         ]
         if MARIADB_ROOT_PASSWORD:
             new_site_cmd += ["--db-root-password", MARIADB_ROOT_PASSWORD]
@@ -221,6 +226,7 @@ def provision_tenant(job_id, slug, company_name, admin_email, admin_password, pl
         bootstrap_kwargs = json.dumps({
             "company_name": company_name,
             "admin_email": admin_email,
+            "admin_password": admin_password,
             "plan": plan,
         })
         result = run_as_frappe([

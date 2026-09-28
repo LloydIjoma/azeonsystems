@@ -27,8 +27,6 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {/* Sign In destination isn't built in this phase — wire to the
-              real tenant login flow when it exists. */}
           <Link href="/login" className="font-body text-sm font-semibold text-white/90 hover:text-white">
             Sign In
           </Link>
